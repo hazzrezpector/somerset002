@@ -12,6 +12,7 @@ const menuItems = [
   { id: 'layanan', label: 'Layanan Warga', icon: '📋' },
   { id: 'jadwal', label: 'Jadwal Kegiatan', icon: '📅' },
   { id: 'keamanan', label: 'Keamanan', icon: '🛡️' },
+  { id: 'profil', label: 'Profil & Pengaturan', icon: '⚙️' },
 ];
 
 export default function Sidebar({ activePage, setActivePage, isOpen }: SidebarProps) {

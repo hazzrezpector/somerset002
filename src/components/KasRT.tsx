@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Transaction {
   id: number;
@@ -9,25 +10,12 @@ interface Transaction {
   category: string;
 }
 
-const initialTransactions: Transaction[] = [
-  { id: 1, date: '12 Jan 2026', description: 'Iuran Bulanan - Ahmad Suryadi', type: 'income', amount: 50000, category: 'Iuran' },
-  { id: 2, date: '12 Jan 2026', description: 'Iuran Bulanan - Budi Santoso', type: 'income', amount: 50000, category: 'Iuran' },
-  { id: 3, date: '11 Jan 2026', description: 'Pembelian bahan kebersihan kerja bakti', type: 'expense', amount: 150000, category: 'Kegiatan' },
-  { id: 4, date: '10 Jan 2026', description: 'Iuran Bulanan - Eko Prasetyo', type: 'income', amount: 50000, category: 'Iuran' },
-  { id: 5, date: '10 Jan 2026', description: 'Iuran Bulanan - Dewi Lestari', type: 'income', amount: 50000, category: 'Iuran' },
-  { id: 6, date: '9 Jan 2026', description: 'Perbaikan lampu jalan', type: 'expense', amount: 200000, category: 'Infrastruktur' },
-  { id: 7, date: '8 Jan 2026', description: 'Iuran Bulanan - Fitri Handayani', type: 'income', amount: 50000, category: 'Iuran' },
-  { id: 8, date: '7 Jan 2026', description: 'Konsumsi rapat RT', type: 'expense', amount: 75000, category: 'Kegiatan' },
-  { id: 9, date: '6 Jan 2026', description: 'Donasi warga untuk perbaikan masjid', type: 'income', amount: 500000, category: 'Donasi' },
-  { id: 10, date: '5 Jan 2026', description: 'Iuran Bulanan - Gunawan Wibowo', type: 'income', amount: 50000, category: 'Iuran' },
-];
-
 export default function KasRT() {
+  const { transactions, addTransaction } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [showDetail, setShowDetail] = useState<Transaction | null>(null);
   const [showDelete, setShowDelete] = useState<Transaction | null>(null);
   const [filter, setFilter] = useState('all');
-  const [transactions, setTransactions] = useState(initialTransactions);
   const [toast, setToast] = useState('');
 
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
@@ -46,7 +34,6 @@ export default function KasRT() {
   };
 
   const handleDelete = (t: Transaction) => {
-    setTransactions(transactions.filter(tr => tr.id !== t.id));
     setShowDelete(null);
     showToast('Transaksi berhasil dihapus');
   };
@@ -202,7 +189,6 @@ export default function KasRT() {
             </div>
             <div className="p-5 border-t border-gray-100 flex gap-3 justify-end">
               <button onClick={() => setShowDetail(null)} className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Tutup</button>
-              <button onClick={() => { setShowDetail(null); setShowModal(true); }} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Edit</button>
             </div>
           </div>
         </div>
@@ -225,45 +211,14 @@ export default function KasRT() {
 
       {/* Add Transaction Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg">
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-lg text-gray-800">Tambah Transaksi</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-gray-100">✕</button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Transaksi</label>
-                <select className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
-                  <option>Pemasukan</option>
-                  <option>Pengeluaran</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <input type="text" className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Keterangan transaksi" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah (Rp)</label>
-                <input type="number" className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                <select className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
-                  <option>Iuran</option>
-                  <option>Kegiatan</option>
-                  <option>Infrastruktur</option>
-                  <option>Donasi</option>
-                  <option>Lainnya</option>
-                </select>
-              </div>
-            </div>
-            <div className="p-5 border-t border-gray-100 flex gap-3 justify-end">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Batal</button>
-              <button onClick={() => { setShowModal(false); showToast('Transaksi berhasil ditambahkan'); }} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Simpan</button>
-            </div>
-          </div>
-        </div>
+        <AddTransactionModal
+          onClose={() => setShowModal(false)}
+          onSave={(data) => {
+            addTransaction(data);
+            setShowModal(false);
+            showToast('Transaksi berhasil ditambahkan');
+          }}
+        />
       )}
 
       {/* Toast */}
@@ -273,6 +228,66 @@ export default function KasRT() {
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}
+    </div>
+  );
+}
+
+function AddTransactionModal({ onClose, onSave }: { onClose: () => void; onSave: (data: { date: string; description: string; type: 'income' | 'expense'; amount: number; category: string }) => void }) {
+  const [type, setType] = useState<'income' | 'expense'>('income');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('Iuran');
+
+  const handleSubmit = () => {
+    if (!description || !amount) return;
+    onSave({
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      description,
+      type,
+      amount: parseInt(amount),
+      category,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+          <h3 className="font-bold text-lg text-gray-800">Tambah Transaksi</h3>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">✕</button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Jenis Transaksi</label>
+            <select value={type} onChange={(e) => setType(e.target.value as 'income' | 'expense')} className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="income">Pemasukan</option>
+              <option value="expense">Pengeluaran</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+            <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Keterangan transaksi" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Jumlah (Rp)</label>
+            <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option>Iuran</option>
+              <option>Kegiatan</option>
+              <option>Infrastruktur</option>
+              <option>Donasi</option>
+              <option>Lainnya</option>
+            </select>
+          </div>
+        </div>
+        <div className="p-5 border-t border-gray-100 flex gap-3 justify-end">
+          <button onClick={onClose} className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Batal</button>
+          <button onClick={handleSubmit} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Simpan</button>
+        </div>
+      </div>
     </div>
   );
 }

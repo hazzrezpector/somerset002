@@ -1,13 +1,19 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const { kasBalance } = useAuth();
   const [showNotif, setShowNotif] = useState(false);
   const [activeQuickAction, setActiveQuickAction] = useState<string | null>(null);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
 
   const stats = [
     { label: 'Total Warga', value: '248', icon: '👥', color: 'bg-blue-50 text-blue-600', change: '+5' },
     { label: 'Kepala Keluarga', value: '72', icon: '🏠', color: 'bg-emerald-50 text-emerald-600', change: '+2' },
-    { label: 'Kas Bulan Ini', value: 'Rp 4.2 Jt', icon: '💰', color: 'bg-amber-50 text-amber-600', change: '+12%' },
+    { label: 'Saldo Kas', value: formatCurrency(kasBalance), icon: '💰', color: 'bg-amber-50 text-amber-600', change: 'Realtime' },
     { label: 'Layanan Aktif', value: '8', icon: '📋', color: 'bg-purple-50 text-purple-600', change: '3 baru' },
   ];
 

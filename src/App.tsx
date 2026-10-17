@@ -9,6 +9,7 @@ import KasRT from './components/KasRT';
 import Layanan from './components/Layanan';
 import JadwalKegiatan from './components/JadwalKegiatan';
 import Keamanan from './components/Keamanan';
+import PengurusProfile from './components/PengurusProfile';
 import WargaDashboard from './components/WargaDashboard';
 
 function PengurusApp() {
@@ -27,18 +28,15 @@ function PengurusApp() {
       case 'layanan': return <Layanan />;
       case 'jadwal': return <JadwalKegiatan />;
       case 'keamanan': return <Keamanan />;
+      case 'profil': return <PengurusProfile />;
       default: return <Dashboard />;
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -99,11 +97,14 @@ function PengurusApp() {
                     <p className="text-xs text-gray-400 mt-1">{user?.email}</p>
                   </div>
                   <div className="p-1">
-                    <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2">
-                      <span>👤</span> Profil Saya
+                    <button
+                      onClick={() => { setShowProfile(false); setActivePage('profil'); }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                    >
+                      <span>👤</span> Profil & Pengaturan
                     </button>
                     <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2">
-                      <span>⚙️</span> Pengaturan
+                      <span>⚙️</span> Pengaturan Umum
                     </button>
                     <button
                       onClick={() => { setShowProfile(false); setShowLogoutConfirm(true); }}
@@ -128,24 +129,12 @@ function PengurusApp() {
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-              🚪
-            </div>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">🚪</div>
             <h3 className="text-lg font-bold text-gray-800">Keluar dari Aplikasi?</h3>
             <p className="text-sm text-gray-500 mt-2">Anda akan kembali ke halaman login</p>
             <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium"
-              >
-                Batal
-              </button>
-              <button
-                onClick={logout}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium"
-              >
-                Ya, Keluar
-              </button>
+              <button onClick={() => setShowLogoutConfirm(false)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Batal</button>
+              <button onClick={logout} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium">Ya, Keluar</button>
             </div>
           </div>
         </div>
