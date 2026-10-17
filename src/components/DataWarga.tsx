@@ -10,7 +10,7 @@ interface Warga {
   pekerjaan: string;
 }
 
-const dataWarga: Warga[] = [
+const initialData: Warga[] = [
   { id: 1, nama: 'Ahmad Suryadi', nik: '3201012345670001', alamat: 'Jl. Mawar No. 1', noHP: '081234567890', status: 'Kepala Keluarga', pekerjaan: 'Wiraswasta' },
   { id: 2, nama: 'Siti Aminah', nik: '3201012345670002', alamat: 'Jl. Mawar No. 1', noHP: '081234567891', status: 'Istri', pekerjaan: 'Ibu Rumah Tangga' },
   { id: 3, nama: 'Budi Santoso', nik: '3201012345670003', alamat: 'Jl. Melati No. 5', noHP: '081234567892', status: 'Kepala Keluarga', pekerjaan: 'PNS' },
@@ -26,11 +26,26 @@ const dataWarga: Warga[] = [
 export default function DataWarga() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showDetail, setShowDetail] = useState<Warga | null>(null);
+  const [showDelete, setShowDelete] = useState<Warga | null>(null);
+  const [data, setData] = useState(initialData);
+  const [toast, setToast] = useState('');
 
-  const filtered = dataWarga.filter(w =>
+  const filtered = data.filter(w =>
     w.nama.toLowerCase().includes(search.toLowerCase()) ||
     w.alamat.toLowerCase().includes(search.toLowerCase())
   );
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const handleDelete = (warga: Warga) => {
+    setData(data.filter(w => w.id !== warga.id));
+    setShowDelete(null);
+    showToast(`Data ${warga.nama} berhasil dihapus`);
+  };
 
   return (
     <div className="space-y-6">
@@ -51,12 +66,12 @@ export default function DataWarga() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Total Warga', value: '248', icon: '👥' },
+          { label: 'Total Warga', value: data.length.toString(), icon: '👥' },
           { label: 'Laki-laki', value: '128', icon: '👨' },
           { label: 'Perempuan', value: '120', icon: '👩' },
           { label: 'KK', value: '72', icon: '🏠' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+          <div key={s.label} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
             <span className="text-lg">{s.icon}</span>
             <p className="text-xl font-bold text-gray-800 mt-1">{s.value}</p>
             <p className="text-xs text-gray-500">{s.label}</p>
@@ -120,12 +135,30 @@ export default function DataWarga() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600" title="Edit">
+                      <button
+                        onClick={() => setShowDetail(warga)}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600"
+                        title="Lihat Detail"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setShowModal(true)}
+                        className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-600"
+                        title="Edit"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
-                      <button className="p-1.5 rounded-lg hover:bg-red-50 text-red-600" title="Hapus">
+                      <button
+                        onClick={() => setShowDelete(warga)}
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-red-600"
+                        title="Hapus"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -140,7 +173,7 @@ export default function DataWarga() {
 
         {/* Pagination */}
         <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-          <p className="text-sm text-gray-500">Menampilkan {filtered.length} dari {dataWarga.length} warga</p>
+          <p className="text-sm text-gray-500">Menampilkan {filtered.length} dari {data.length} warga</p>
           <div className="flex gap-1">
             <button className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">←</button>
             <button className="px-3 py-1.5 text-sm rounded-lg bg-emerald-600 text-white">1</button>
@@ -151,17 +184,73 @@ export default function DataWarga() {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Detail Modal */}
+      {showDetail && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md">
+            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-bold text-lg text-gray-800">Detail Warga</h3>
+              <button onClick={() => setShowDetail(null)} className="p-1 rounded-lg hover:bg-gray-100">✕</button>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 text-2xl font-bold">
+                  {showDetail.nama.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-800 text-lg">{showDetail.nama}</h4>
+                  <p className="text-sm text-gray-500">{showDetail.status}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500">NIK</span>
+                  <span className="text-sm font-medium text-gray-800">{showDetail.nik}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500">No. HP</span>
+                  <span className="text-sm font-medium text-gray-800">{showDetail.noHP}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-sm text-gray-500">Alamat</span>
+                  <span className="text-sm font-medium text-gray-800">{showDetail.alamat}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-sm text-gray-500">Pekerjaan</span>
+                  <span className="text-sm font-medium text-gray-800">{showDetail.pekerjaan}</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-5 border-t border-gray-100 flex gap-3 justify-end">
+              <button onClick={() => setShowDetail(null)} className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Tutup</button>
+              <button onClick={() => { setShowDetail(null); setShowModal(true); }} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Edit Data</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {showDelete && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">⚠️</div>
+            <h3 className="text-lg font-bold text-gray-800">Hapus Data Warga?</h3>
+            <p className="text-sm text-gray-500 mt-2">Data <strong>{showDelete.nama}</strong> akan dihapus permanen</p>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowDelete(null)} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Batal</button>
+              <button onClick={() => handleDelete(showDelete)} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium">Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-bold text-lg text-gray-800">Tambah Warga Baru</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-gray-100">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-lg hover:bg-gray-100">✕</button>
             </div>
             <div className="p-5 space-y-4">
               <div>
@@ -197,9 +286,17 @@ export default function DataWarga() {
             </div>
             <div className="p-5 border-t border-gray-100 flex gap-3 justify-end">
               <button onClick={() => setShowModal(false)} className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">Batal</button>
-              <button onClick={() => setShowModal(false)} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Simpan</button>
+              <button onClick={() => { setShowModal(false); showToast('Data warga berhasil ditambahkan'); }} className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-medium">Simpan</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 z-50">
+          <span>✅</span>
+          <span className="text-sm font-medium">{toast}</span>
         </div>
       )}
     </div>

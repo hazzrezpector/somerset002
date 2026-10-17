@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import DataWarga from './components/DataWarga';
@@ -7,10 +9,14 @@ import KasRT from './components/KasRT';
 import Layanan from './components/Layanan';
 import JadwalKegiatan from './components/JadwalKegiatan';
 import Keamanan from './components/Keamanan';
+import WargaDashboard from './components/WargaDashboard';
 
-export default function App() {
+function PengurusApp() {
+  const { user, logout } = useAuth();
   const [activePage, setActivePage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const renderPage = () => {
     switch (activePage) {
@@ -70,11 +76,44 @@ export default function App() {
               </svg>
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                P
-              </div>
-              <span className="hidden md:block text-sm font-medium text-gray-700">Pak Budi</span>
+            <div className="relative">
+              <button
+                onClick={() => setShowProfile(!showProfile)}
+                className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1 transition-colors"
+              >
+                <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                  {user?.name?.charAt(0)}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-medium text-gray-700">{user?.name}</p>
+                  <p className="text-xs text-gray-400">{user?.position}</p>
+                </div>
+              </button>
+
+              {/* Profile Dropdown */}
+              {showProfile && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-50">
+                  <div className="p-3 border-b border-gray-100">
+                    <p className="font-bold text-gray-800">{user?.name}</p>
+                    <p className="text-xs text-gray-500">{user?.position}</p>
+                    <p className="text-xs text-gray-400 mt-1">{user?.email}</p>
+                  </div>
+                  <div className="p-1">
+                    <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2">
+                      <span>👤</span> Profil Saya
+                    </button>
+                    <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2">
+                      <span>⚙️</span> Pengaturan
+                    </button>
+                    <button
+                      onClick={() => { setShowProfile(false); setShowLogoutConfirm(true); }}
+                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                    >
+                      <span>🚪</span> Keluar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -84,6 +123,55 @@ export default function App() {
           {renderPage()}
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+              🚪
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Keluar dari Aplikasi?</h3>
+            <p className="text-sm text-gray-500 mt-2">Anda akan kembali ke halaman login</p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium"
+              >
+                Batal
+              </button>
+              <button
+                onClick={logout}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium"
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function AppContent() {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  if (user?.role === 'warga') {
+    return <WargaDashboard />;
+  }
+
+  return <PengurusApp />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
